@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-
 const file = path.join(__dirname, '../../data/tickets.json');
 const empty = { nextId: 1, tickets: {}, ratings: {}, audit: [], settings: {}, counters: {} };
 function ensure() { fs.mkdirSync(path.dirname(file), { recursive: true }); if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify(empty, null, 2)); }
@@ -14,6 +13,7 @@ function removeTicket(id) { delete state.tickets[String(id)]; return save(); }
 function activeTickets() { return Object.values(state.tickets); }
 function findByUser(guildId, userId) { return activeTickets().find(t => t.guildId === guildId && t.userId === userId && !t.closedAt); }
 function findByChannel(channelId) { return activeTickets().find(t => t.channelId === channelId && !t.closedAt); }
+function findAnyByChannel(channelId) { return activeTickets().find(t => t.channelId === channelId); }
 function setRating(id, rating, comment = null) { state.ratings[String(id)] = { score: rating, comment, createdAt: new Date().toISOString() }; if (state.tickets[String(id)]) state.tickets[String(id)].rating = rating; return save(); }
 function getRating(id) { return state.ratings[String(id)] || null; }
 function stats(guildId) { const all = activeTickets().filter(t => t.guildId === guildId); const ratings = all.map(t => t.rating).filter(Number.isInteger); return { total: all.length, open: all.filter(t => !t.closedAt).length, closed: all.filter(t => t.closedAt).length, ratings: ratings.length, average: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0 }; }
@@ -22,4 +22,4 @@ function getAudit(guildId, ticketId = null, limit = 50) { return state.audit.fil
 function setGuildSettings(guildId, patch) { state.settings[guildId] = { ...(state.settings[guildId] || {}), ...patch }; return save(); }
 function getGuildSettings(guildId) { return state.settings[guildId] || {}; }
 function incrementCounter(guildId, key) { const counters = state.counters[guildId] || {}; counters[key] = (counters[key] || 0) + 1; state.counters[guildId] = counters; save(); return counters[key]; }
-module.exports = { nextId, setTicket, getTicket, removeTicket, activeTickets, findByUser, findByChannel, setRating, getRating, stats, addAudit, getAudit, setGuildSettings, getGuildSettings, incrementCounter, save };
+module.exports = { nextId, setTicket, getTicket, removeTicket, activeTickets, findByUser, findByChannel, findAnyByChannel, setRating, getRating, stats, addAudit, getAudit, setGuildSettings, getGuildSettings, incrementCounter, save };
