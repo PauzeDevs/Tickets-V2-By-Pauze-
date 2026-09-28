@@ -5,13 +5,33 @@
   "supportRoleId": "REPLACE_WITH_SUPPORT_ROLE_ID",
   "staffRoleIds": [],
   "logsChannelId": "REPLACE_WITH_TICKET_LOGS_CHANNEL_ID",
-  "ticketNameFormat": "ticket-{id}",
-  "deleteClosedChannel": true,
+  "deleteAfterCloseSeconds": 10,
   "maxOpenTicketsPerUser": 1,
+  "theme": { "accent": "#5865F2", "dark": "#2B2D31" },
+  "embeds": {
+    "panel": { "color": "#2B2D31", "title": "Support Center", "description": "Select a department below to create a private support ticket.", "footer": "Pauze Tickets" },
+    "ticket": { "color": "#5865F2", "title": "Ticket #{id}", "description": "Your request has been received. A member of the support team will assist you shortly.", "footer": "Pauze Tickets" }
+  },
   "categories": [
-    {"value":"general","label":"General Support","description":"General questions and assistance","emoji":"support"},
-    {"value":"technical","label":"Technical Inquiries","description":"Technical issues and troubleshooting","emoji":"technical"},
-    {"value":"billing","label":"Purchases & Billing","description":"Purchases, payments and billing","emoji":"billing"},
-    {"value":"report","label":"Player/User Reports","description":"Report a player or user","emoji":"report"}
+    { "value": "general", "label": "General Support", "description": "General questions and assistance", "emoji": "support", "questions": [
+      { "id": "topic", "label": "Short Topic", "style": "Short", "required": true, "placeholder": "What do you need help with?" },
+      { "id": "details", "label": "Detailed Description", "style": "Paragraph", "required": true, "placeholder": "Explain the issue in detail." },
+      { "id": "identifier", "label": "ID / Gamertag / Email", "style": "Short", "required": false, "placeholder": "Optional" }
+    ] },
+    { "value": "technical", "label": "Technical Inquiries", "description": "Technical issues and troubleshooting", "emoji": "technical", "questions": [
+      { "id": "topic", "label": "Issue", "style": "Short", "required": true },
+      { "id": "details", "label": "Technical Details", "style": "Paragraph", "required": true },
+      { "id": "identifier", "label": "Version / ID", "style": "Short", "required": false }
+    ] },
+    { "value": "billing", "label": "Purchases & Billing", "description": "Purchases, payments and billing", "emoji": "billing", "questions": [
+      { "id": "topic", "label": "Purchase Topic", "style": "Short", "required": true },
+      { "id": "details", "label": "Order Details", "style": "Paragraph", "required": true },
+      { "id": "identifier", "label": "Order ID", "style": "Short", "required": false }
+    ] },
+    { "value": "report", "label": "Player/User Reports", "description": "Report a player or user", "emoji": "report", "questions": [
+      { "id": "topic", "label": "Reported User", "style": "Short", "required": true },
+      { "id": "details", "label": "Report Details", "style": "Paragraph", "required": true },
+      { "id": "identifier", "label": "Evidence / ID", "style": "Short", "required": false }
+    ] }
   ]
 }
