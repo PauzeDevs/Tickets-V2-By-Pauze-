@@ -2,6 +2,8 @@
 
 A modular Discord.js v14 ticket system focused on fast interactions, clean embeds, private support workflows, transcripts, and persistent ticket state.
 
+> **Open source with attribution required.** You are free to use, modify, and distribute this project under the MIT License, provided the original copyright and license notice remain with the software.
+
 ## Features
 
 - `/setup-panel` support hub with category select menu
@@ -97,10 +99,22 @@ The repository is organized around:
 
 Feature work should merge into `develop`, then `staging`, and finally `main`.
 
+## Attribution & Usage
+
+This project is authored and maintained by **PauzeDevs**.
+
+You may use, modify, and redistribute the software in accordance with the MIT License. If you redistribute the project or substantial portions of its source code, you must retain the original **PauzeDevs copyright notice** and the **MIT License**.
+
+The **Pauze**, **PauzeDevs**, and **Pauze Tickets** names, logos, branding, and other trademarks are not granted for use by this software license. Permission to use the code does not imply endorsement by or affiliation with PauzeDevs.
+
+If you build a public project from this codebase, please retain the upstream repository link and clearly identify your project as a fork, derivative, or modified version where applicable.
+
 ## Security
 
 Never commit bot tokens, database credentials, API keys, or private Discord configuration. Use environment variables for secrets.
 
 ## License
 
-See `LICENSE` for the project license.
+This project is licensed under the **MIT License**. See [`LICENSE`](LICENSE) for the complete license text.
+
+**Copyright © 2026 PauzeDevs. All rights reserved to the extent permitted by the MIT License.**
