@@ -1,12 +1,13 @@
 {
   "name": "pauze-tickets",
-  "version": "1.0.0",
-  "description": "Production-ready Discord ticket bot for discord.js v14",
+  "version": "2.0.0",
+  "description": "Modular production-grade Discord ticket system for discord.js v14",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "check": "node --check src/index.js && node --check src/commands/setup-panel.js && node --check src/commands/ticket.js && node --check src/interactions/buttons.js && node --check src/interactions/modals.js && node --check src/interactions/selectMenus.js && node --check src/services/ticketManager.js && node --check src/utils/database.js && node --check src/utils/transcript.js"
   },
   "engines": { "node": ">=18.17.0" },
   "dependencies": {
