@@ -1,0 +1,18 @@
+{
+  "mode": "channel",
+  "ticketCategoryId": "REPLACE_WITH_TICKET_CATEGORY_ID",
+  "intakeChannelId": "REPLACE_WITH_INTAKE_CHANNEL_ID",
+  "supportRoleId": "REPLACE_WITH_SUPPORT_ROLE_ID",
+  "logsChannelId": "REPLACE_WITH_TICKET_LOGS_CHANNEL_ID",
+  "staffRoleIds": [],
+  "ticketNameFormat": "ticket-{id}",
+  "autoCloseHours": 0,
+  "deleteClosedChannel": true,
+  "transcriptRetentionDays": 30,
+  "categories": [
+    { "value": "general", "label": "General Support", "description": "General questions and assistance", "emoji": "support" },
+    { "value": "technical", "label": "Technical Inquiries", "description": "Technical issues and troubleshooting", "emoji": "technical" },
+    { "value": "billing", "label": "Purchases & Billing", "description": "Purchases, payments and billing", "emoji": "billing" },
+    { "value": "report", "label": "Player/User Reports", "description": "Report a player or user", "emoji": "report" }
+  ]
+}

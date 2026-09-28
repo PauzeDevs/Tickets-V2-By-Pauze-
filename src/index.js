@@ -1,0 +1,30 @@
+require('dotenv').config();
+const fs=require('node:fs'),path=require('node:path');
+const {Client,GatewayIntentBits,Partials,REST,Routes,Collection,PermissionFlagsBits,EmbedBuilder,ActionRowBuilder,ButtonBuilder,ButtonStyle}=require('discord.js');
+const config=require('./config/config.json'),db=require('./utils/database');
+const {intakeModal,closeConfirm,closeModal,csatRow}=require('./utils/components');
+const {createTicket,canStaff}=require('./services/ticketManager'); const {generateTranscript}=require('./utils/transcript'); const {ACCENT,DARK}=require('./utils/embeds');
+const client=new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers,GatewayIntentBits.GuildMessages,GatewayIntentBits.MessageContent,GatewayIntentBits.DirectMessages],partials:[Partials.Channel]}); client.commands=new Collection();
+for(const f of fs.readdirSync(path.join(__dirname,'commands')).filter(x=>x.endsWith('.js'))){const c=require(`./commands/${f}`);client.commands.set(c.data.name,c);}
+async function register(){const rest=new REST({version:'10'}).setToken(process.env.DISCORD_TOKEN),body=[...client.commands.values()].map(c=>c.data.toJSON());const route=process.env.GUILD_ID?Routes.applicationGuildCommands(process.env.CLIENT_ID,process.env.GUILD_ID):Routes.applicationCommands(process.env.CLIENT_ID);await rest.put(route,{body});}
+client.once('ready',async()=>{await register();console.log(`Logged in as ${client.user.tag}`);console.log(`Recovered ${db.activeTickets().length} active tickets.`);});
+client.on('interactionCreate',async i=>{try{
+ if(i.isChatInputCommand()){const c=client.commands.get(i.commandName);if(c)return c.execute(i);}
+ if(i.isStringSelectMenu()&&i.customId==='ticket:category'){await i.showModal(intakeModal(i.values[0]));return;}
+ if(i.isModalSubmit()&&i.customId.startsWith('ticket:intake:')){await i.deferReply({ephemeral:true});const category=i.customId.split(':')[2];const t=await createTicket(i,category,{topic:i.fields.getTextInputValue('topic'),description:i.fields.getTextInputValue('description'),identifier:i.fields.getTextInputValue('identifier')});await i.editReply(`Ticket #${String(t.id).padStart(4,'0')} created.`);return;}
+ if(i.isButton()&&i.customId.startsWith('ticket:')){const parts=i.customId.split(':');const action=parts[1],id=parts[2];
+   if(action==='csat'){const score=Number(parts[3]);const ticket=db.getTicket(id);if(!ticket)return i.reply({content:'This ticket is no longer available for rating.',ephemeral:true});db.setRating(id,{score,userId:i.user.id,createdAt:new Date().toISOString()});await i.update({content:`Rating recorded: ${score}/5.`,components:[]});const logs=await client.channels.fetch(config.logsChannelId).catch(()=>null);if(logs)await logs.send({embeds:[new EmbedBuilder().setColor(ACCENT).setTitle(`CSAT • Ticket #${id}`).setDescription(`Creator: <@${ticket.userId}>\nStaff: ${ticket.claimedBy?`<@${ticket.claimedBy}>`:'Unclaimed'}\nScore: ${score}/5`)]});return;}
+   const ticket=db.getTicket(id);if(!ticket)return i.reply({content:'This ticket is no longer active.',ephemeral:true});if(!canStaff(i.member)&&action!=='closecancel')return i.reply({content:'You do not have permission to manage this ticket.',ephemeral:true});
+   if(action==='claim'){ticket.claimedBy=i.user.id;db.setTicket(ticket);await i.channel.setName(`claimed-${i.user.username}`.slice(0,90)).catch(()=>{});await i.reply({content:`Ticket claimed by ${i.user}.`});return;}
+   if(action==='transcript'){const file=await generateTranscript(i.channel,ticket);await i.reply({content:'Transcript generated.',files:[file],ephemeral:true});return;}
+   if(action==='close'){await i.reply({content:'Confirm ticket closure or cancel.',components:[closeConfirm(id)],ephemeral:true});return;}
+   if(action==='closecancel'){await i.update({content:'Ticket closure cancelled.',components:[]});return;}
+   if(action==='closeconfirm'){await i.showModal(closeModal(id));return;}
+ }
+ if(i.isModalSubmit()&&i.customId.startsWith('ticket:closemodal:')){const id=i.customId.split(':')[2],ticket=db.getTicket(id);if(!ticket)return i.reply({content:'Ticket is no longer active.',ephemeral:true});if(!canStaff(i.member))return i.reply({content:'You do not have permission.',ephemeral:true});await i.deferReply({ephemeral:true});const reason=i.fields.getTextInputValue('reason'),file=await generateTranscript(i.channel,ticket),duration=Math.max(0,Date.now()-new Date(ticket.createdAt).getTime()),durationText=`${Math.floor(duration/3600000)}h ${Math.floor(duration/60000)%60}m`;
+   const dm=await i.client.users.fetch(ticket.userId);await dm.send({embeds:[new EmbedBuilder().setColor(DARK).setTitle(`Ticket #${String(id).padStart(4,'0')} closed`).setDescription(`Your ticket has been resolved.\n\n**Reason**\n${reason}\n\n**Resolved by**\n${i.user}\n\n**Duration**\n${durationText}`).setFooter({text:`Ticket #${id}`})],files:[file],components:[csatRow(id)]}).catch(()=>{});
+   const logs=await client.channels.fetch(config.logsChannelId).catch(()=>null);if(logs){const logFile=await generateTranscript(i.channel,ticket);await logs.send({embeds:[new EmbedBuilder().setColor(DARK).setTitle(`Ticket #${String(id).padStart(4,'0')} closed`).addFields({name:'Creator',value:`<@${ticket.userId}>`,inline:true},{name:'Resolved by',value:`<@${i.user.id}>`,inline:true},{name:'Duration',value:durationText,inline:true},{name:'Reason',value:reason.slice(0,1024)})],files:[logFile]});}
+   db.removeTicket(id);await i.editReply('Ticket closed.');if(config.deleteClosedChannel)setTimeout(()=>i.channel.delete(`Closed ticket #${id}`).catch(()=>{}),1500);
+ }
+ }catch(err){console.error(err);if(!i.replied&&!i.deferred)await i.reply({content:'An internal error occurred while processing this interaction.',ephemeral:true}).catch(()=>{});else await i.editReply({content:'An internal error occurred while processing this interaction.'}).catch(()=>{});}});
+process.on('unhandledRejection',console.error);process.on('SIGINT',()=>client.destroy());process.on('SIGTERM',()=>client.destroy());client.login(process.env.DISCORD_TOKEN);

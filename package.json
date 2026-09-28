@@ -1,0 +1,16 @@
+{
+  "name": "pauze-tickets",
+  "version": "1.0.0",
+  "description": "Production-ready Discord ticket bot for discord.js v14",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": { "node": ">=18.17.0" },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.2"
+  }
+}
